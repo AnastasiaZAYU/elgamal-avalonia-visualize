@@ -15,20 +15,90 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <StackPanel Margin="20" Spacing="10" VerticalAlignment="Center">
-        <TextBlock Text="ElGamal Parameters (3072-bit)" FontSize="18" FontWeight="Bold" HorizontalAlignment="Center"/>
-			
-        <TextBlock Text="Prime P:"/>
-        <TextBox Text="{Binding PText}" IsReadOnly="True" TextWrapping="Wrap" MaxHeight="100"/>
+    <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="20">
+		<StackPanel Grid.Row="0" Spacing="10">
+			<TextBlock Text="ElGamal Crypto Tool" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
 
-        <TextBlock Text="Generator G:"/>
-        <TextBox Text="{Binding GText}" IsReadOnly="True" TextWrapping="Wrap"/>
+            <Button Content="Generate keys"
+                    Command="{Binding GenerateKeysCommand}"
+                    HorizontalAlignment="Stretch"
+                    HorizontalContentAlignment="Center"
+                    Height="40"/>
 
-        <Button Content="Generate Keys"
-                Command="{Binding GenerateKeysCommand}"
-                HorizontalAlignment="Stretch"
-                HorizontalContentAlignment="Center"
-                Padding="10"/>
-    </StackPanel>
+            <Grid ColumnDefinitions="*, *" Margin="0,5">
+				<StackPanel Grid.Column="0" Margin="0,0,5,0">
+					<TextBlock Text="System status: "/>
+                    <TextBox Text="{Binding StatusMessage}" IsReadOnly="True" Background="#F0F0F0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="1" Margin="5,0,0,0">
+					<TextBlock Text="Key parameters: "/>
+                    <TextBox Text="KeyPair Generated" IsReadOnly="True"
+                             IsEnabled="{Binding KeyPair, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                </StackPanel>
+            </Grid>
+            <Separator Margin="0,10"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1" Spacing="5">
+			<TextBlock Text="Input message: "/>
+            <TextBox Text="{Binding InputMessage}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     Height="100"
+                     Watermark="Enter text to encrypt..."/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Spacing="10" Margin="0,15,0,0">
+			<Grid ColumnDefinitions="*, *">
+				<Button Grid.Column="0"
+                        Content="Ecrypt"
+                        Command="{Binding EncryptCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Margin="0,0,5,0"/>
+                <Button Grid.Column="1"
+                        Content="Decrypt"
+                        Command="{Binding DecryptCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Margin="5,0,0,0"/>
+            </Grid>
+
+            <Grid ColumnDefinitions="*, *">
+				<Button Grid.Column="0"
+                        Content="Sign"
+                        Command="{Binding SignCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Background="#2D5A27"
+                        Foreground="White"
+                        Margin="0,0,5,0"/>
+                <Button Grid.Column="1"
+                        Content="Verify"
+                        Command="{Binding VerifyCommand}"
+                        HorizontalAlignment="Stretch"
+                        HorizontalContentAlignment="Center"
+                        Background="#1E3A5F"
+                        Foreground="White"
+                        Margin="5,0,0,0"/>
+            </Grid>
+
+            <TextBlock Text="Result: "/>
+            <TextBox Text="{Binding ResultText}"
+                     AcceptsReturn="True"
+                     TextWrapping="Wrap"
+                     Height="120"
+                     IsReadOnly="False"
+                     Watermark="The result of encryption/decryption will appear here..."/>
+        </StackPanel>
+
+        <TextBlock Grid.Row="3"
+                   Text="{Binding StatusMessage}"
+                   FontSize="12"
+                   Foreground="Gray"
+                   Margin="0,10,0,0"
+                   HorizontalAlignment="Right"/>
+    </Grid>
+
 
 </Window>

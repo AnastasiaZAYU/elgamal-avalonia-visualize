@@ -23,5 +23,6 @@
     </PackageReference>
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="ReactiveUI" Version="23.1.8" />
+    <PackageReference Include="ReactiveUI.Avalonia" Version="11.4.7" />
   </ItemGroup>
 </Project>

@@ -8,27 +8,48 @@ using System.Linq;
 using System.Reactive.Linq;
 using Avalonia.Utilities;
 using Avalonia.Metadata;
+using System.Windows.Input;
 
 namespace ElGamalGUI.ViewModels;
 
 public class MainWindowViewModel : ViewModelBase
 {
     private readonly ElGamalService _elGamalService;
-    private ElGamalParameters? _parameters;
-    private ElGamalKeyPair? _keyPair;
+    private ElGamalParameters _parameters;
+    private ElGamalKeyPair _keyPair;
 
-    public ElGamalKeyPair? KeyPair { get => _keyPair; set => this.RaiseAndSetIfChanged(ref _keyPair, value); }
+    private string _pText = "Not generated";
+    private string _gText = "Not generated";
+    private string _publicKeyText = "Not generated";
+    private string _inputMessage = string.Empty;
+    private string _ciphertext = string.Empty;
+    private string _signatureText = string.Empty;
+    private string _isValidText = string.Empty;
+    private bool _isBusy = false;
+    private bool _areKeysGenerated = false;
+    private string _statusText = "Generate keys first!";
 
-    private string _inputMessage = "Hello, Avalonia!";
+    public MainWindowViewModel()
+    {
+        _elGamalService = new ElGamalService();
+        GenerateKeysCommand = ReactiveCommand.CreateFromTask(GenerateKeysAsync);
+        EncryptCommand = ReactiveCommand.Create(EncryptMessage);
+        DecryptCommand = ReactiveCommand.Create(DecryptMessage);
+        SignCommand = ReactiveCommand.Create(SignMessage);
+        VerifyCommand = ReactiveCommand.Create(VerifySignature);
+    }
+
+    public string PText { get => _pText; set => this.RaiseAndSetIfChanged(ref _pText, value); }
+    public string GText { get => _gText; set => this.RaiseAndSetIfChanged(ref _gText, value); }
+    public string PublicKeyText { get => _publicKeyText; set => this.RaiseAndSetIfChanged(ref _publicKeyText, value); }
     public string InputMessage { get => _inputMessage; set => this.RaiseAndSetIfChanged(ref _inputMessage, value); }
+    public string CiphertextText { get => _ciphertext; set => this.RaiseAndSetIfChanged(ref _ciphertext, value); }
+    public string SignatureText { get => _signatureText; set => this.RaiseAndSetIfChanged(ref _signatureText, value); }
+    public string IsValidText { get => _isValidText; set => this.RaiseAndSetIfChanged(ref _isValidText, value); }
+    public bool IsBusy { get => _isBusy; set => this.RaiseAndSetIfChanged(ref _isBusy, value); }
+    public bool AreKeysGenerated { get => _areKeysGenerated; set => this.RaiseAndSetIfChanged(ref _areKeysGenerated, value); }
+    public string StatusText { get => _statusText; set => this.RaiseAndSetIfChanged(ref _statusText, value); }
 
-
-    private string _statusMessage = "Ready to work";
-    public string StatusMessage { get => _statusMessage; set => this.RaiseAndSetIfChanged(ref _statusMessage, value); } //set => SetProperty(ref _statusMessage, value); }
-
-
-    private string _resultText = string.Empty;
-    public string ResultText { get => _resultText; set => this.RaiseAndSetIfChanged(ref _resultText, value); }
 
     public ReactiveCommand<Unit, Unit> GenerateKeysCommand { get; }
     public ReactiveCommand<Unit, Unit> EncryptCommand { get; }
@@ -36,178 +57,167 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SignCommand { get; }
     public ReactiveCommand<Unit, Unit> VerifyCommand { get; }
 
-    public MainWindowViewModel()
-    {
-        _elGamalService = new ElGamalService();
-        var canEncrypt = this.WhenAnyValue(
-            x => x.KeyPair,
-            (ElGamalKeyPair? k) => k != null
-            );
-        GenerateKeysCommand = ReactiveCommand.CreateFromTask(GenerateKeysAsync);
-        EncryptCommand = ReactiveCommand.Create(EncryptMessage, canEncrypt);
-        DecryptCommand = ReactiveCommand.Create(DecryptMessage, canEncrypt);
-        SignCommand = ReactiveCommand.Create(SignMessage, canEncrypt);
-        VerifyCommand = ReactiveCommand.Create(VerifySignature, canEncrypt);
-    }
 
     private async Task GenerateKeysAsync()
     {
-        StatusMessage = "Generating system... Please wait.";
+        IsBusy = true;
+        StatusText = "Generating system... Please wait.";
 
         try
         {
-            var results = await Task.Run(() =>
+            await Task.Run(() =>
             {
-                var p = _elGamalService.GenerateParameters(1024);
-                var k = _elGamalService.GenerateKeyPair(p);
-                return (Parameters: p, KeyPair: k);
+                var paramsResult = _elGamalService.GenerateParameters(3072);
+                var keysResult = _elGamalService.GenerateKeyPair(paramsResult);
+
+                _parameters = paramsResult;
+                _keyPair = keysResult;
+
+                PText = $"{_parameters:P}";
+                GText = $"{_parameters:G}";
+                PublicKeyText = $"{_keyPair:PublicKey}";
             });
 
-            _parameters = results.Parameters;
-            KeyPair = results.KeyPair;
-            StatusMessage = "Keys generated successfully!";
+            AreKeysGenerated = true;
+            StatusText = "Ready to work!";
         }
         catch (Exception ex)
         {
-            StatusMessage = $"Error: {ex.Message}";
+            StatusText = $"Error during generation: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
     private void EncryptMessage()
     {
-        if (_keyPair is ElGamalKeyPair keys && _parameters is ElGamalParameters paramsCurrent)
+        if (string.IsNullOrWhiteSpace(InputMessage))
+            return;
+
+        if (_parameters.IsEmpty || _keyPair.IsEmpty)
         {
-            var cipher = _elGamalService.Encrypt(InputMessage, paramsCurrent, keys.PublicKey);
-            string blockY = string.Join(":", cipher.Y.Select(b => b.ToString("X")));
-            ResultText = $"{cipher.X.ToString("X")}|{blockY}";
-            StatusMessage = "Message encrypted.";
+            StatusText = "Error: Generate keys first!";
+            return;
         }
-        else { StatusMessage = "First, generate the keys"; }
+
+        try
+        {
+            var ciphertext = _elGamalService.Encrypt(InputMessage, _parameters, _keyPair.PublicKey);
+            CiphertextText = ciphertext.ToString();
+            StatusText = "Ready to work!";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Encryption error: {ex.Message}";
+            CiphertextText = string.Empty;
+        }
     }
 
     private void DecryptMessage()
     {
-        if (_keyPair is ElGamalKeyPair keys && _parameters is ElGamalParameters paramsCurrent)
+        if (string.IsNullOrWhiteSpace(CiphertextText))
+            return;
+
+        if (_parameters.IsEmpty || _keyPair.IsEmpty)
         {
-            try
-            {
-                var parts = ResultText.Split('|');
-                if (parts.Length < 2)
-                    throw new Exception("Invalid format");
-
-                BigInteger x = BigInteger.Parse(parts[0], System.Globalization.NumberStyles.HexNumber);
-                var yBlocks = parts[1].Split(':')
-                    .Select(hex => BigInteger.Parse(hex, System.Globalization.NumberStyles.HexNumber))
-                    .ToList();
-                var ciphertext = new ElGamalCiphertext(x, yBlocks);
-                string decrypted = _elGamalService.Decrypt(ciphertext, paramsCurrent, keys.PrivateKey);
-                ResultText = decrypted;
-                StatusMessage = "Message decrypted.";
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = "Decryption failed. Check keys or input.";
-            }
+            StatusText = "Error: Generate keys first!";
+            return;
         }
-    }
-
-    private void SignMessage()
-    {
-        if (_keyPair is ElGamalKeyPair keys && _parameters is ElGamalParameters paramsCurrent)
-        {
-            try
-            {
-                var signature = _elGamalService.Sign(InputMessage, paramsCurrent, keys.PrivateKey);
-                ResultText = $"{signature.R.ToString("X")}|{signature.S.ToString("X")}";
-                StatusMessage = "Message signed.";
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = $"Signing failed: {ex.Message}";
-            }
-        }
-    }
-
-    private void VerifySignature()
-    {
-        if (_keyPair is ElGamalKeyPair keys && _parameters is ElGamalParameters paramsCurrent)
-        {
-            try
-            {
-                var parts = ResultText.Split('|');
-                if (parts.Length < 2)
-                    throw new Exception("Invalid signature format. Use R|S");
-
-                BigInteger r = BigInteger.Parse(parts[0], System.Globalization.NumberStyles.HexNumber);
-                BigInteger s = BigInteger.Parse(parts[1], System.Globalization.NumberStyles.HexNumber);
-
-                var signature = new ElGamalSignature(r, s);
-                bool isValid = _elGamalService.Verify(InputMessage, signature, paramsCurrent, keys.PublicKey);
-
-                if (isValid)
-                {
-                    StatusMessage = "✅ Signature is VALID!";
-                    ResultText = "SUCCESS: The message is authentic.";
-                }
-                else
-                {
-                    StatusMessage = "❌ Signature is INVALID!";
-                    ResultText = "WARNING: The message may have been tampered with.";
-                }
-            }
-            catch (Exception ex)
-            {
-                StatusMessage = "Verification error. Check signature format.";
-            }
-        }
-    }
-}
-
-
-    /*private string _pText = "Not generated";
-    private string _gText = "Not generated";
-
-    private string _privateKeyText = "Not generated";
-    private string _publicKeyText = "Not generated";
-    private string _statusText = "Ready";
-
-    #region Properties
-    public string PText { get => _pText; set => SetProperty(ref _pText, value); }
-    public string GText { get => _gText; set => SetProperty(ref _gText, value); }
-    public string PrivateKeyText { get => _privateKeyText; set => SetProperty(ref _privateKeyText, value); }
-    public string PublicKeyText { get => _publicKeyText; set => SetProperty(ref _publicKeyText, value); }
-    public string StatusText { get => _statusText; set => SetProperty(ref _statusText, value); }
-    #endregion
-
-    public ReactiveCommand<Unit, Unit> GenerateAllCommand { get; }
-
-    public MainWindowViewModel()
-    {
-        GenerateAllCommand = ReactiveCommand.CreateFromTask(GenerateFullSystemAsync);
-    }
-
-    private async Task GenerateFullSystemAsync()
-    {
-        // marshal the UI update to the UI thread
-        Dispatcher.UIThread.Post(() => StatusText = "Generating 3072-bit system... Please wait.");
 
         try
         {
-            var result = await Task.Run(() => { /* heavy work *//* });
+            var parts = CiphertextText.Split('|');
+            if (parts.Length != 2)
+                throw new Exception("Invalid ciphertext format. Expected 'X|Y'");
 
-            Dispatcher.UIThread.Post(() =>
-            {
-                PText = result.parameters.P.ToString("X");
-                GText = result.parameters.G.ToString("X");
-                PrivateKeyText = result.keyPair.PrivateKey.ToString("X");
-                PublicKeyText = result.keyPair.PublicKey.ToString("X");
-                StatusText = "System generated successfully!";
-            });
+            string xStr = parts[0].Replace("0x", "", StringComparison.OrdinalIgnoreCase);
+            BigInteger x = BigInteger.Parse(xStr, System.Globalization.NumberStyles.HexNumber);
+
+            var yParts = parts[1].Split(':');
+            var yBlocks = yParts
+              .Select(p => p.Replace("0x", "", StringComparison.OrdinalIgnoreCase))
+              .Select(p => BigInteger.Parse(p, System.Globalization.NumberStyles.HexNumber))
+              .ToList();
+
+            var ciphertext = new ElGamalCiphertext { X = x, Y = yBlocks };
+            InputMessage = _elGamalService.Decrypt(ciphertext, _parameters, _keyPair.PrivateKey);
+            StatusText = "Ready to work!";
         }
         catch (Exception ex)
         {
-            Dispatcher.UIThread.Post(() => StatusText = $"Error: {ex.Message}");
+            StatusText = $"Decryption error: {ex.Message}";
+            InputMessage = string.Empty;
         }
     }
-}*/
 
+    public void SignMessage()
+    {
+        if (string.IsNullOrWhiteSpace(InputMessage))
+        {
+            StatusText = "Error: Message is empty!";
+            return;
+        }
+
+        if (_parameters.IsEmpty || _keyPair.IsEmpty)
+        {
+            StatusText = "Error: Generate keys first!";
+            return;
+        }
+
+        try
+        {
+            var signature = _elGamalService.Sign(InputMessage, _parameters, _keyPair.PrivateKey);
+            SignatureText = signature.ToString();
+            StatusText = "Ready to work!";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Signing error: {ex.Message}";
+            SignatureText = string.Empty;
+        }
+    }
+
+    public void VerifySignature()
+    {
+        if (string.IsNullOrWhiteSpace(InputMessage) || string.IsNullOrWhiteSpace(SignatureText))
+        {
+            StatusText = "Missing message or signature!";
+            return;
+        }
+
+        if (_parameters.IsEmpty || _keyPair.IsEmpty)
+        {
+            StatusText = "Error: Generate keys first!";
+            return;
+        }
+
+        try
+        {
+            var parts = SignatureText.Split('|');
+            if (parts.Length != 2)
+                throw new Exception("Invalid signature format. Expected 'R|S'");
+
+            string rStr = parts[0].Replace("0x", "", StringComparison.OrdinalIgnoreCase);
+            string sStr = parts[1].Replace("0x", "", StringComparison.OrdinalIgnoreCase);
+
+            BigInteger r = BigInteger.Parse(rStr, System.Globalization.NumberStyles.HexNumber);
+            BigInteger s = BigInteger.Parse(sStr, System.Globalization.NumberStyles.HexNumber);
+
+            var signature = new ElGamalSignature { R = r, S = s };
+            bool isValid = _elGamalService.Verify(InputMessage, signature, _parameters, _keyPair.PublicKey);
+
+            IsValidText = isValid
+              ? "✅ Signature is Valid"
+              : "❌ Signature is Compromised!";
+
+            StatusText = "Ready to work!";
+        }
+        catch (Exception ex)
+        {
+            StatusText = $"Verification error: {ex.Message}";
+            IsValidText = string.Empty;
+        }
+    }
+}

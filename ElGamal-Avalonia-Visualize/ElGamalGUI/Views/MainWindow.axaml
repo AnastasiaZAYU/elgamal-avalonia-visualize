@@ -15,90 +15,110 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="20">
-		<StackPanel Grid.Row="0" Spacing="10">
-			<TextBlock Text="ElGamal Crypto Tool" FontSize="24" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,10"/>
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+    </Grid.RowDefinitions>
 
-            <Button Content="Generate keys"
-                    Command="{Binding GenerateKeysCommand}"
-                    HorizontalAlignment="Stretch"
-                    HorizontalContentAlignment="Center"
-                    Height="40"/>
+        <TextBlock Grid.Row="0" Text="ElGamal Crypto Tools (3072-bit)"
+                   FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,15"/>
 
-            <Grid ColumnDefinitions="*, *" Margin="0,5">
-				<StackPanel Grid.Column="0" Margin="0,0,5,0">
-					<TextBlock Text="System status: "/>
-                    <TextBox Text="{Binding StatusMessage}" IsReadOnly="True" Background="#F0F0F0"/>
-                </StackPanel>
-                <StackPanel Grid.Column="1" Margin="5,0,0,0">
-					<TextBlock Text="Key parameters: "/>
-                    <TextBox Text="KeyPair Generated" IsReadOnly="True"
-                             IsEnabled="{Binding KeyPair, Converter={x:Static ObjectConverters.IsNotNull}}"/>
-                </StackPanel>
-            </Grid>
-            <Separator Margin="0,10"/>
+        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto, *" Margin="0,5">
+			<TextBlock Grid.Column="0" Text="P:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Grid.Column="1"
+                     Text="{Binding PText}" 
+                     IsReadOnly="True"
+                     Margin="0,0,15,0"/>
+
+            <TextBlock Grid.Column="2" Text="G:" VerticalAlignment="Center" Margin="0,0,5,0"/>
+            <TextBox Grid.Column="3" 
+                     Text="{Binding GText}" 
+                     IsReadOnly="True"/>
+        </Grid>
+
+        <Grid Grid.Row="2" ColumnDefinitions="Auto, *, Auto" Margin="0,5">
+			<TextBlock Grid.Column="0" Text="Public Key:" VerticalAlignment="Center" Width="80"/>
+            <TextBox Grid.Column="1" 
+                     Text="{Binding PublicKeyText}" 
+                     IsReadOnly="True"
+                     Margin="0,0,10,0"/>
+
+            <Button Grid.Column="2" 
+                Content="Generate Parameters &amp; Keypair"
+                Command="{Binding GenerateKeysCommand}"
+                IsEnabled="{Binding !IsBusy}"
+                Width="250"
+                Height="34"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"/>
+        </Grid>
+
+        <DockPanel Grid.Row="3" Margin="0,5">
+			<TextBlock DockPanel.Dock="Top" Text="Message:"/>
+            <TextBox Text="{Binding InputMessage}" AcceptsReturn="True" TextWrapping="Wrap"/>
+        </DockPanel>
+
+        <DockPanel Grid.Row="4" Margin="0,5">
+			<TextBlock DockPanel.Dock="Top" Text="Ciphertext:"/>
+            <TextBox Text="{Binding CiphertextText}" AcceptsReturn="True" TextWrapping="Wrap"/>
+        </DockPanel>
+        
+        <DockPanel Grid.Row="5" Margin="0,5">
+			<TextBlock DockPanel.Dock="Top" Text="Signature:"/>
+            <TextBox Text="{Binding SignatureText}" AcceptsReturn="True" TextWrapping="Wrap"/>
+        </DockPanel>
+
+        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,10">
+			<TextBlock Text="Is Valid?" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,10,0"/>
+            <TextBox Text="{Binding IsValidText}" IsReadOnly="True" Width="150" Foreground="Gray"/>
         </StackPanel>
 
-        <StackPanel Grid.Row="1" Spacing="5">
-			<TextBlock Text="Input message: "/>
-            <TextBox Text="{Binding InputMessage}"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     Height="100"
-                     Watermark="Enter text to encrypt..."/>
-        </StackPanel>
+        <UniformGrid Grid.Row="7" Columns="4" Margin="0,10,0,0">
+			<Button Content="Encrypt" 
+                    Command="{Binding EncryptCommand}" 
+                    IsEnabled="{Binding AreKeysGenerated}"
+                    Margin="2"/>
+            <Button Content="Decrypt" 
+                    Command="{Binding DecryptCommand}"
+                    IsEnabled="{Binding AreKeysGenerated}"
+                    Margin="2"/>
+            <Button Content="Sign" 
+                    Command="{Binding SignCommand}"
+                    IsEnabled="{Binding AreKeysGenerated}"
+                    Margin="2"/>
+            <Button Content="Verify" 
+                    Command="{Binding VerifyCommand}" 
+                    IsEnabled="{Binding AreKeysGenerated}"
+                    Margin="2"/>
+        </UniformGrid>
 
-        <StackPanel Grid.Row="2" Spacing="10" Margin="0,15,0,0">
-			<Grid ColumnDefinitions="*, *">
-				<Button Grid.Column="0"
-                        Content="Ecrypt"
-                        Command="{Binding EncryptCommand}"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Margin="0,0,5,0"/>
-                <Button Grid.Column="1"
-                        Content="Decrypt"
-                        Command="{Binding DecryptCommand}"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Margin="5,0,0,0"/>
-            </Grid>
+        <Border Grid.Row="8"
+                Background="#F3F3F3"
+                BorderBrush="Gray"
+                BorderThickness="0,1,0,0"
+                Margin="-20,20,-20,-20"
+                Padding="10,5">
+            <StackPanel Orientation="Horizontal">
+				<TextBlock Text="Status: " FontWeight="Bold" VerticalAlignment="Center"/>
+                <TextBlock Text="{Binding StatusText}"
+                           VerticalAlignment="Center"
+                           Foreground="Black"/>
 
-            <Grid ColumnDefinitions="*, *">
-				<Button Grid.Column="0"
-                        Content="Sign"
-                        Command="{Binding SignCommand}"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Background="#2D5A27"
-                        Foreground="White"
-                        Margin="0,0,5,0"/>
-                <Button Grid.Column="1"
-                        Content="Verify"
-                        Command="{Binding VerifyCommand}"
-                        HorizontalAlignment="Stretch"
-                        HorizontalContentAlignment="Center"
-                        Background="#1E3A5F"
-                        Foreground="White"
-                        Margin="5,0,0,0"/>
-            </Grid>
-
-            <TextBlock Text="Result: "/>
-            <TextBox Text="{Binding ResultText}"
-                     AcceptsReturn="True"
-                     TextWrapping="Wrap"
-                     Height="120"
-                     IsReadOnly="False"
-                     Watermark="The result of encryption/decryption will appear here..."/>
-        </StackPanel>
-
-        <TextBlock Grid.Row="3"
-                   Text="{Binding StatusMessage}"
-                   FontSize="12"
-                   Foreground="Gray"
-                   Margin="0,10,0,0"
-                   HorizontalAlignment="Right"/>
+                <ProgressBar IsIndeterminate="True"
+                             IsVisible="{Binding IsBusy}"
+                             Width="100"
+                             Height="10"
+                             Margin="15,0,0,0"
+                             VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
     </Grid>
-
-
 </Window>

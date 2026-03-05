@@ -17,7 +17,6 @@ namespace ElGamalGUI.Models
             S = s;
         }
 
-        public override string ToString() =>
-            $"R: 0x{R.ToString("X")}\nS: 0x{S.ToString("X")}\n";
+        public override string ToString() => $"0x{R:X}|0x{S:X}";
     }
 }

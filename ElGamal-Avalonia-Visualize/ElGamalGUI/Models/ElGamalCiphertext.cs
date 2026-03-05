@@ -17,11 +17,7 @@ namespace ElGamalGUI.Models
             Y = y;
         }
 
-        public override string ToString()
-        {
-            string hexY = string.Join(":", Y.Select(b => b.ToString("X")));
-            return $"Ephemeral Key (X): 0x{X.ToString("X")}\n" +
-                "Encrypted Blocks (Y): {hexY}\n";
-        }
+        public override string ToString() =>
+            $"0x{X:X}|{string.Join(":", Y.Select(b => "0x" + b.ToString("X")))}";
     }
 }

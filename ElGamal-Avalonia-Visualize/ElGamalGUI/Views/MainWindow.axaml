@@ -1,122 +1,149 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:ElGamalGUI.ViewModels"
+        xmlns:conv="using:ElGamalGUI.Converters"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="ElGamalGUI.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Icon="/Assets/avalonia-logo.ico"
-        Title="ElGamalGUI">
+        Title="ElGamal Crypto Workspace"
+        Background="#EFECE8"
+        MinWidth="900"
+        MinHeight="500">
+
+    <Window.Resources>
+        <conv:StatusColorConverter x:Key="StatusColorConverter"/>
+    </Window.Resources>
 
     <Design.DataContext>
         <!-- This only sets the DataContext for the previewer in an IDE,
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
-    <Grid Margin="20">
-        <Grid.RowDefinitions>
-        <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="Auto"/>
-    </Grid.RowDefinitions>
-
-        <TextBlock Grid.Row="0" Text="ElGamal Crypto Tools (3072-bit)"
-                   FontSize="20" FontWeight="Bold" HorizontalAlignment="Center" Margin="0,0,0,15"/>
-
-        <Grid Grid.Row="1" ColumnDefinitions="Auto, *, Auto, *" Margin="0,5">
-			<TextBlock Grid.Column="0" Text="P:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Grid.Column="1"
-                     Text="{Binding PText}" 
-                     IsReadOnly="True"
-                     Margin="0,0,15,0"/>
-
-            <TextBlock Grid.Column="2" Text="G:" VerticalAlignment="Center" Margin="0,0,5,0"/>
-            <TextBox Grid.Column="3" 
-                     Text="{Binding GText}" 
-                     IsReadOnly="True"/>
-        </Grid>
-
-        <Grid Grid.Row="2" ColumnDefinitions="Auto, *, Auto" Margin="0,5">
-			<TextBlock Grid.Column="0" Text="Public Key:" VerticalAlignment="Center" Width="80"/>
-            <TextBox Grid.Column="1" 
-                     Text="{Binding PublicKeyText}" 
-                     IsReadOnly="True"
-                     Margin="0,0,10,0"/>
-
-            <Button Grid.Column="2" 
-                Content="Generate Parameters &amp; Keypair"
-                Command="{Binding GenerateKeysCommand}"
-                IsEnabled="{Binding !IsBusy}"
-                Width="250"
-                Height="34"
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"/>
-        </Grid>
-
-        <DockPanel Grid.Row="3" Margin="0,5">
-			<TextBlock DockPanel.Dock="Top" Text="Message:"/>
-            <TextBox Text="{Binding InputMessage}" AcceptsReturn="True" TextWrapping="Wrap"/>
-        </DockPanel>
-
-        <DockPanel Grid.Row="4" Margin="0,5">
-			<TextBlock DockPanel.Dock="Top" Text="Ciphertext:"/>
-            <TextBox Text="{Binding CiphertextText}" AcceptsReturn="True" TextWrapping="Wrap"/>
-        </DockPanel>
+    
+    <Grid RowDefinitions="*, Auto">
         
-        <DockPanel Grid.Row="5" Margin="0,5">
-			<TextBlock DockPanel.Dock="Top" Text="Signature:"/>
-            <TextBox Text="{Binding SignatureText}" AcceptsReturn="True" TextWrapping="Wrap"/>
-        </DockPanel>
+        <ScrollViewer Grid.Row="0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <Grid Margin="20" RowDefinitions="Auto, Auto, Auto, Auto">
+                
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,25">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="ElGamal" FontSize="32" FontWeight="Black" Foreground="#2C3E50" LetterSpacing="1"/>
+                        <TextBlock Text=" Crypto Workspace" FontSize="32" FontWeight="Light" Foreground="#5D6D7E" LetterSpacing="1"/>            	
+                </StackPanel>
+                    <Border Background="#34495E" CornerRadius="4" Padding="10,3" HorizontalAlignment="Center" Margin="0,8,0,0">
+                        <TextBlock Text="ASIMMETRIC 3072-BIT SECURITY" FontSize="9" FontWeight="Bold" Foreground="White" LetterSpacing="2"/>
+                    </Border>
+                </StackPanel>
+                
+                <Border Grid.Row="1" Background="#FAFAFA" CornerRadius="12" Padding="15,12" Margin="0,0,0,10">
+                    <Border.BoxShadow>
+                        <BoxShadows>0 4 10 0 #15000000</BoxShadows>
+                    </Border.BoxShadow>
+                    
+                    <StackPanel Spacing="10">
+                        <Grid ColumnDefinitions="Auto, *, Auto, *">
+                            <TextBlock Grid.Column="0" Text="P" VerticalAlignment="Center" Margin="0,0,10,0" 
+                                       Foreground="#7F8C8D" FontSize="12" FontWeight="Bold"/>
+                            <TextBox Grid.Column="1" Text="{Binding PText}" IsReadOnly="True" 
+                                     Margin="0,0,15,0" CornerRadius="6" Padding="8,5" 
+                                     Background="#F8F9FA" FontFamily="Cascadia Code" 
+                                     FontSize="12" Watermark="Not generated..."
+                                     VerticalContentAlignment="Center"/>
+                            
+                            <TextBlock Grid.Column="2" Text="G" VerticalAlignment="Center" Margin="0,0,10,0" 
+                                       Foreground="#7F8C8D" FontSize="12" FontWeight="Bold"/>
+                            <TextBox Grid.Column="3" Text="{Binding GText}" IsReadOnly="True" 
+                                     CornerRadius="6" Padding="8,5" 
+                                     Background="#F8F9FA" FontFamily="Cascadia Code" 
+                                     FontSize="12" Watermark="Not generated..."
+                                     VerticalContentAlignment="Center"/>
+                        </Grid>
+                        
+                        <Separator Height="1" Background="#F2F2F2" Margin="0,-2"/>
+                
+                        <Grid ColumnDefinitions="Auto, *, Auto">
+                            <TextBlock Grid.Column="0" Text="Public Key" VerticalAlignment="Center" 
+                                       Width="80" FontSize="13" FontWeight="Bold" Foreground="#34495E"/>
+                            <TextBox Grid.Column="1" Text="{Binding PublicKeyText}" IsReadOnly="True" 
+                                     Margin="0,0,10,0" CornerRadius="6" Padding="10,5" MinHeight="32"
+                                     VerticalContentAlignment="Center" Background="#F8F9FA" 
+                                     FontFamily="Cascadia Code" FontSize="12" Watermark="Not generated..."/>
+                            
+                            <Button Grid.Column="2" Content="Generate New Keypair" Command="{Binding GenerateKeysCommand}"
+                                    MinWidth="220" Height="38" Background="#4A90E2" Foreground="White" 
+                                    FontWeight="Bold" FontSize="13" CornerRadius="6"
+                                    HorizontalContentAlignment="Center" VerticalContentAlignment="Center">
+                            </Button>
+                        </Grid> 
+                </StackPanel> 
+            </Border>
+                
+                <Border Grid.Row="2" Background="#FAFAFA" CornerRadius="12" Padding="20" Margin="0,0,0,15">
+                    <Border.BoxShadow>
+                        <BoxShadows>0 4 10 0 #15000000</BoxShadows>
+                    </Border.BoxShadow>
+                    
+                    <Grid RowDefinitions="Auto, Auto, Auto, Auto">
 
-        <StackPanel Grid.Row="6" Orientation="Horizontal" Margin="0,10">
-			<TextBlock Text="Is Valid?" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,10,0"/>
-            <TextBox Text="{Binding IsValidText}" IsReadOnly="True" Width="150" Foreground="Gray"/>
-        </StackPanel>
+				<Grid Grid.Row="0" RowDefinitions="Auto, Auto" Margin="0,0,0,15">
+                    <TextBlock Grid.Row="0" Text="MESSAGE" FontSize="11" FontWeight="ExtraBold" Foreground="#7F8C8D" Margin="5,0,0,5" LetterSpacing="1"/>
+                    <TextBox Grid.Row="1" Text="{Binding InputMessage}" Height="70" AcceptsReturn="True" CornerRadius="8" 
+                             Padding="12" TextWrapping="Wrap" Background="White" BorderBrush="#E0E0E0"  
+                             Watermark="Type your secret message here..."
+                             ScrollViewer.VerticalScrollBarVisibility="Auto"/>  
+                    </Grid>
+                        
+                        <Grid Grid.Row="1" RowDefinitions="Auto, Auto" Margin="0,0,0,15">
+                            <TextBlock Grid.Row="0" Text="CIPHERTEXT" FontSize="11" FontWeight="ExtraBold" Foreground="#7F8C8D" Margin="5,0,0,5" LetterSpacing="1"/>
+                            <TextBox Grid.Row="1" Text="{Binding CiphertextText}" Height="100" AcceptsReturn="True" CornerRadius="8" 
+                                     Padding="12" TextWrapping="Wrap" Background="White" BorderBrush="#E0E0E0"
+                                     FontFamily="Cascadia Code" FontSize="13"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                        </Grid>
+                        
+                        <Grid Grid.Row="2" RowDefinitions="Auto, Auto" Margin="0,0,0,15">
+                            <TextBlock Grid.Row="0" Text="DIGITAL SIGNATURE" FontSize="11" FontWeight="ExtraBold" Foreground="#7F8C8D" Margin="5,0,0,5" LetterSpacing="1"/>
+                            <TextBox Grid.Row="1" Text="{Binding SignatureText}" Height="100" AcceptsReturn="True" CornerRadius="8" 
+                                     Padding="12" TextWrapping="Wrap" Background="White" BorderBrush="#E0E0E0"
+                                     FontFamily="Cascadia Code" FontSize="13"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto"/>
+                        </Grid>
+                
+                        <StackPanel Grid.Row="3" Orientation="Horizontal" Spacing="15" HorizontalAlignment="Left">
+                            <TextBlock Text="Verification Status" VerticalAlignment="Center" FontWeight="SemiBold" Foreground="#34495E"/>
+                            <Border Background="White" BorderBrush="#E0E0E0" BorderThickness="1"
+                                    CornerRadius="6" Padding="15,8" MinWidth="120">
+                                <TextBlock Text="{Binding IsValidText}" 
+                                           Foreground="{Binding IsValidText, Converter={StaticResource StatusColorConverter}}" 
+                                           FontWeight="SemiBold" HorizontalAlignment="Center" FontSize="14"/>
+                            </Border>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+                
+                <UniformGrid Grid.Row="3" Columns="4" Margin="0,0,0,10">
+                    <Button Content="Encrypt" Command="{Binding EncryptCommand}" IsEnabled="{Binding AreKeysGenerated}" Margin="4" Height="42" CornerRadius="8" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="#27AE60" Foreground="White"/>
+                    <Button Content="Decrypt" Command="{Binding DecryptCommand}" IsEnabled="{Binding AreKeysGenerated}" Margin="4" Height="42" CornerRadius="8" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="#2ECC71" Foreground="White"/>
+                    <Button Content="Sign"    Command="{Binding SignCommand}"    IsEnabled="{Binding AreKeysGenerated}" Margin="4" Height="42" CornerRadius="8" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="#8E44AD" Foreground="White"/>
+                    <Button Content="Verify"  Command="{Binding VerifyCommand}"  IsEnabled="{Binding AreKeysGenerated}" Margin="4" Height="42" CornerRadius="8" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="#9B59B6" Foreground="White"/>
+                </UniformGrid>
+            </Grid>
+        </ScrollViewer>
+        
+        <Border Grid.Row="1" Background="#2C3E50" Padding="25,10">
+            <StackPanel Orientation="Horizontal" Spacing="20" VerticalAlignment="Center">
+                <TextBlock Text="SYSTEM STATUS:" Foreground="White" Opacity="0.6" LetterSpacing="1.5"
+                           VerticalAlignment="Center" FontSize="10" FontWeight="ExtraBold"/>
 
-        <UniformGrid Grid.Row="7" Columns="4" Margin="0,10,0,0">
-			<Button Content="Encrypt" 
-                    Command="{Binding EncryptCommand}" 
-                    IsEnabled="{Binding AreKeysGenerated}"
-                    Margin="2"/>
-            <Button Content="Decrypt" 
-                    Command="{Binding DecryptCommand}"
-                    IsEnabled="{Binding AreKeysGenerated}"
-                    Margin="2"/>
-            <Button Content="Sign" 
-                    Command="{Binding SignCommand}"
-                    IsEnabled="{Binding AreKeysGenerated}"
-                    Margin="2"/>
-            <Button Content="Verify" 
-                    Command="{Binding VerifyCommand}" 
-                    IsEnabled="{Binding AreKeysGenerated}"
-                    Margin="2"/>
-        </UniformGrid>
-
-        <Border Grid.Row="8"
-                Background="#F3F3F3"
-                BorderBrush="Gray"
-                BorderThickness="0,1,0,0"
-                Margin="-20,20,-20,-20"
-                Padding="10,5">
-            <StackPanel Orientation="Horizontal">
-				<TextBlock Text="Status: " FontWeight="Bold" VerticalAlignment="Center"/>
                 <TextBlock Text="{Binding StatusText}"
-                           VerticalAlignment="Center"
-                           Foreground="Black"/>
-
-                <ProgressBar IsIndeterminate="True"
-                             IsVisible="{Binding IsBusy}"
-                             Width="100"
-                             Height="10"
-                             Margin="15,0,0,0"
+                           Foreground="{Binding StatusText, Converter={StaticResource StatusColorConverter}}"
+                           FontWeight="Normal" FontSize="14" VerticalAlignment="Center"
+                           Margin="0,-2,0,0"/>
+                <ProgressBar IsIndeterminate="True" IsVisible="{Binding IsBusy}" 
+                             Width="100" Height="2" Foreground="#3498DB" Background="#1A252F" 
                              VerticalAlignment="Center"/>
             </StackPanel>
         </Border>

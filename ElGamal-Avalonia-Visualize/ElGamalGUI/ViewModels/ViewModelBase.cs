@@ -1,9 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using ReactiveUI;
 
-namespace ElGamalGUI.ViewModels
+namespace ElGamalGUI.ViewModels;
+
+public abstract class ViewModelBase : ReactiveObject
 {
-    public abstract class ViewModelBase : ReactiveObject
-    {
-    }
 }

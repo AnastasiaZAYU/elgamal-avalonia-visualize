@@ -18,9 +18,9 @@ public class MainWindowViewModel : ViewModelBase
     private ElGamalParameters _parameters;
     private ElGamalKeyPair _keyPair;
 
-    private string _pText = "Not generated";
-    private string _gText = "Not generated";
-    private string _publicKeyText = "Not generated";
+    private string _pText = string.Empty;
+    private string _gText = string.Empty;
+    private string _publicKeyText = string.Empty;
     private string _inputMessage = string.Empty;
     private string _ciphertext = string.Empty;
     private string _signatureText = string.Empty;
@@ -78,8 +78,12 @@ public class MainWindowViewModel : ViewModelBase
                 PublicKeyText = $"{_keyPair:PublicKey}";
             });
 
+            CiphertextText = string.Empty;
+            SignatureText = string.Empty;
+            IsValidText = string.Empty;
+
             AreKeysGenerated = true;
-            StatusText = "Ready to work!";
+            StatusText = "New keypair generated. Ready to work.";
         }
         catch (Exception ex)
         {
@@ -93,6 +97,8 @@ public class MainWindowViewModel : ViewModelBase
 
     private void EncryptMessage()
     {
+        StatusText = "Processing...";
+
         if (string.IsNullOrWhiteSpace(InputMessage))
             return;
 
@@ -106,17 +112,21 @@ public class MainWindowViewModel : ViewModelBase
         {
             var ciphertext = _elGamalService.Encrypt(InputMessage, _parameters, _keyPair.PublicKey);
             CiphertextText = ciphertext.ToString();
-            StatusText = "Ready to work!";
+            StatusText = "Ready to work.";
         }
         catch (Exception ex)
         {
             StatusText = $"Encryption error: {ex.Message}";
             CiphertextText = string.Empty;
+            SignatureText = string.Empty;
+            IsValidText = string.Empty;
         }
     }
 
     private void DecryptMessage()
     {
+        StatusText = "Processing..."; 
+
         if (string.IsNullOrWhiteSpace(CiphertextText))
             return;
 
@@ -143,17 +153,21 @@ public class MainWindowViewModel : ViewModelBase
 
             var ciphertext = new ElGamalCiphertext { X = x, Y = yBlocks };
             InputMessage = _elGamalService.Decrypt(ciphertext, _parameters, _keyPair.PrivateKey);
-            StatusText = "Ready to work!";
+            StatusText = "Ready to work.";
         }
         catch (Exception ex)
         {
             StatusText = $"Decryption error: {ex.Message}";
             InputMessage = string.Empty;
+                        SignatureText = string.Empty;
+            IsValidText = string.Empty;
         }
     }
 
     public void SignMessage()
     {
+        StatusText = "Processing...";
+
         if (string.IsNullOrWhiteSpace(InputMessage))
         {
             StatusText = "Error: Message is empty!";
@@ -170,17 +184,20 @@ public class MainWindowViewModel : ViewModelBase
         {
             var signature = _elGamalService.Sign(InputMessage, _parameters, _keyPair.PrivateKey);
             SignatureText = signature.ToString();
-            StatusText = "Ready to work!";
+            StatusText = "Ready to work.";
         }
         catch (Exception ex)
         {
             StatusText = $"Signing error: {ex.Message}";
             SignatureText = string.Empty;
+            IsValidText = string.Empty;
         }
     }
 
     public void VerifySignature()
     {
+        StatusText = "Processing...";
+
         if (string.IsNullOrWhiteSpace(InputMessage) || string.IsNullOrWhiteSpace(SignatureText))
         {
             StatusText = "Missing message or signature!";
@@ -212,7 +229,7 @@ public class MainWindowViewModel : ViewModelBase
               ? "✅ Signature is Valid"
               : "❌ Signature is Compromised!";
 
-            StatusText = "Ready to work!";
+            StatusText = "Ready to work.";
         }
         catch (Exception ex)
         {

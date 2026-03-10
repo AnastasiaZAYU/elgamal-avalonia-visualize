@@ -18,6 +18,7 @@ public class MainWindowViewModel : ViewModelBase
     private ElGamalParameters _parameters;
     private ElGamalKeyPair _keyPair;
 
+    private readonly int _keySize;
     private string _pText = string.Empty;
     private string _gText = string.Empty;
     private string _publicKeyText = string.Empty;
@@ -29,8 +30,10 @@ public class MainWindowViewModel : ViewModelBase
     private bool _areKeysGenerated = false;
     private string _statusText = "Generate keys first!";
 
-    public MainWindowViewModel()
+    public MainWindowViewModel(int keySize = 3072)
     {
+        _keySize = keySize;
+
         _elGamalService = new ElGamalService();
         GenerateKeysCommand = ReactiveCommand.CreateFromTask(GenerateKeysAsync);
         EncryptCommand = ReactiveCommand.Create(EncryptMessage);
@@ -57,7 +60,6 @@ public class MainWindowViewModel : ViewModelBase
     public ReactiveCommand<Unit, Unit> SignCommand { get; }
     public ReactiveCommand<Unit, Unit> VerifyCommand { get; }
 
-
     private async Task GenerateKeysAsync()
     {
         IsBusy = true;
@@ -67,7 +69,7 @@ public class MainWindowViewModel : ViewModelBase
         {
             await Task.Run(() =>
             {
-                var paramsResult = _elGamalService.GenerateParameters(3072);
+                var paramsResult = _elGamalService.GenerateParameters(_keySize);
                 var keysResult = _elGamalService.GenerateKeyPair(paramsResult);
 
                 _parameters = paramsResult;

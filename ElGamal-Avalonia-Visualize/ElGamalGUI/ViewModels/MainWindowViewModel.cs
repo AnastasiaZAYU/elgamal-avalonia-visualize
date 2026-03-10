@@ -118,7 +118,6 @@ public class MainWindowViewModel : ViewModelBase
         {
             StatusText = $"Encryption error: {ex.Message}";
             CiphertextText = string.Empty;
-            SignatureText = string.Empty;
             IsValidText = string.Empty;
         }
     }
@@ -159,7 +158,9 @@ public class MainWindowViewModel : ViewModelBase
         {
             StatusText = $"Decryption error: {ex.Message}";
             InputMessage = string.Empty;
-                        SignatureText = string.Empty;
+        }
+        finally
+        {
             IsValidText = string.Empty;
         }
     }
@@ -190,6 +191,10 @@ public class MainWindowViewModel : ViewModelBase
         {
             StatusText = $"Signing error: {ex.Message}";
             SignatureText = string.Empty;
+            IsValidText = string.Empty;
+        }
+        finally
+        {
             IsValidText = string.Empty;
         }
     }

@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="src/ElGamalGUI.csproj" />
+  <Project Path="src/ElGamalGUI/ElGamalGUI.csproj" />
   <Project Path="tests/ElGamalGUI.Tests/ElGamalGUI.Tests.csproj" Id="e4b5db6f-7017-45ec-94ea-2008b621b051" />
 </Solution>

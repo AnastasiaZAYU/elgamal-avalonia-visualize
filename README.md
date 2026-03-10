@@ -5,6 +5,7 @@
 [![Framework: .NET 10](https://img.shields.io/badge/Framework-.NET%2010-512bd4.svg)](https://dotnet.microsoft.com/download)
 [![UI: Avalonia 11](https://img.shields.io/badge/UI-Avalonia%2011-e41e26.svg)](https://avaloniaui.net/)
 [![Pattern: MVVM](https://img.shields.io/badge/Pattern-MVVM-orange.svg)](https://learn.microsoft.com/en-us/dotnet/architecture/maui/mvvm)
+[![Tests](https://img.shields.io/badge/Tests-Passing-brightgreen.svg)]()
 
 A modern, high-security desktop application built with **Avalonia UI** that demonstrates the implementation of the **ElGamal Cryptosystem**. This workspace provides a full suite of tools for asymmetric encryption, decryption, and digital signatures using **3072-bit keys**.
 
@@ -62,14 +63,43 @@ The application is designed with a clear logical flow, divided into three functi
 3. ✍️ **Sign**: Click **"Sign"** to create a unique digital signature based on your message and **Private Key**.
 4. ✅ **Verify**: Click **"Verify"** to check if the signature matches the message and the current **Public Key**. A green **"Signature is Valid"** badge will appear upon success.
 
+## 🧪 Testing & Quality Assurance
+
+To ensure the highest level of cryptographic reliability, the project includes a comprehensive test suite powered by **xUnit**.
+
+### Key Test Categories:
+- **Algorithm Verification**: Tests the mathematical correctness of the ElGamal implementation, including encryption/decryption cycles and signature validity.
+- **Probabilistic Encryption**: Verifies that encrypting the same message twice produces different ciphertexts (semantic security).
+- **Edge Case Handling**: Validates system behavior with Unicode (Emoji, Cyrillic), empty strings, and large data blocks.
+- **UI State Logic**: Ensures the ViewModel correctly resets fields upon key regeneration and provides accurate real-time feedback.
+ 
+![Tests](assets/unit-tests-passed.png)
+
+> **Note**: For performance during testing, the Test Suite uses 512-bit keys, while the production application defaults to 3072-bit keys.
+
 ## 🔐 Cryptography Note
 
 The ElGamal scheme implemented here relies on the **Discrete Logarithm Problem**. Encryption follows the formula:
 
 $$c_1 = g^k \pmod p$$
-$$c_2 = m \cdot y^k \pmod p$$
+$$c_2 = (m \cdot y^k) \pmod p$$
 
 Where $y$ is the public key and $k$ is a random ephemeral key.
+
+## 📂 Project Structure
+
+```
+├── assets/                              # Documentation screenshots
+├── src/ElGamalGUI/                      # Main Avalonia Application
+│   ├── Converters/                      # UI Value converters (Status to Color)
+│   ├── Models/                          # Cryptographic core & Interfaces
+│   ├── ViewModels/                      # UI Logic & Reactive commands
+│   └── Views/                           # XAML Layouts & Styling
+├──tests/ElGamalGUI.Tests/               # xUnit Test Suite    
+│   ├── Models/                          # Math & Algorithm verification
+│   └── ViewModels/                      # UI behavior & State tests
+└── ElGamal-Avalonia-Visualize.slnx      # Solution file
+```
 
 ## 🚀 Installation
 
@@ -77,7 +107,7 @@ Where $y$ is the public key and $k$ is a random ephemeral key.
 ```bash
 git clone https://github.com/AnastasiaZAYU/elgamal-avalonia-visualize.git
 ```
-2. Open `ElGamal-Avalonia-Visualize.slnx` in **Visual Studio**.
+2. Open `ElGamal-Avalonia-Visualize.slnx` in **[Visual Studio](https://visualstudio.microsoft.com/)** (2022 or newer).
 3. Build and run the project (F5).
 
 ## 📄 License
